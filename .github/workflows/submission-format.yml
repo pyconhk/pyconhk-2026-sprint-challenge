@@ -1,0 +1,32 @@
+name: Submission format
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-files:
+    name: Check the submission file
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Inspect the pull request file list
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          files=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files?per_page=2")
+          if ! jq -e --arg login "$PR_AUTHOR" \
+            '("tickets/" + ($login | ascii_downcase) + ".txt") as $path
+             | length == 1 and .[0].status == "added" and .[0].filename == $path' \
+            <<<"$files" >/dev/null; then
+            echo 'Your pull request must add exactly one file at tickets/<your-lowercase-github-login>.txt.'
+            exit 1
+          fi
+          echo 'Submission file format accepted.'
