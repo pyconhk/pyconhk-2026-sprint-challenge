@@ -1,0 +1,16 @@
+[project]
+name = "pyconhk-2026-sprint-extra-tickets"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "cryptography>=44",
+    "pydantic>=2,<3",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pyright]
+pythonVersion = "3.10"
+typeCheckingMode = "strict"
+include = ["starter.py", "support/challenge.py", "support/proof.py"]
